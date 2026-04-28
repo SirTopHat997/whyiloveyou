@@ -404,6 +404,7 @@ async function init() {
   // Music controls
   audioEl.volume = MUSIC_VOLUME;
 
+  musicToggleEl.checked = false;  // browser persists checkbox state across reloads; force off
   musicToggleEl.addEventListener("change", handleToggleChange);
   playPauseBtn.addEventListener("click", handlePlayPause);
   prevBtn.addEventListener("click", prevSong);
