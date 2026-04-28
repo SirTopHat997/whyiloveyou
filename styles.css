@@ -77,7 +77,7 @@ body {
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  min-height: 60px;
+  min-height: 82px;
 }
 
 .header-btn {
@@ -121,21 +121,21 @@ body {
 
 .avatar-wrap {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 57px;
+  height: 57px;
 }
 
 .profile-pic {
-  width: 36px;
-  height: 36px;
+  width: 57px;
+  height: 57px;
   object-fit: contain;
   display: block;
 }
 
 .avatar-fallback {
   display: none;
-  width: 36px;
-  height: 36px;
+  width: 57px;
+  height: 57px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;

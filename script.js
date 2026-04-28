@@ -21,7 +21,7 @@ const SONGS = [
 ];
 
 // --- Config ----------------------------------------------------------
-const MUSIC_VOLUME      = 0.08;   // soft background level (0.0–1.0)
+const MUSIC_VOLUME      = 0.1;   // soft background level (0.0–1.0)
 const AVOID_LAST_N      = 8;      // avoid repeating the last N reasons
 const AVOID_LAST_SONGS  = 4;      // avoid repeating the last N songs
 const TYPING_DELAY_MS   = 200;    // ms before typing indicator appears
