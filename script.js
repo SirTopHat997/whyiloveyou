@@ -7,10 +7,17 @@
 // --- Songs -----------------------------------------------------------
 // Add your MP3 files to the /music folder and list them here.
 const SONGS = [
-  // { title: "Song Title", src: "music/filename.mp3" },
-  // Example:
-  // { title: "All of Me", src: "music/all-of-me.mp3" },
-  // { title: "Perfect", src: "music/perfect.mp3" },
+  { title: "Acolyte",                 src: "music/acolyte.mp3"      },
+  { title: "As We Fight",             src: "music/As We Fight.mp3"   }, 
+  { title: "Ask - 2011 Remaster",     src: "music/Ask - 2011 Remaster.mp3"      },                                   
+  { title: "Baby, I Love You",        src: "music/Baby, I Love You.mp3"    },  
+  { title: "Cemetry Gates",           src: "music/Cemetry Gates.mp3"    },  
+  { title: "Cut Your Bangs",          src: "music/Cut Your Bangs.mp3"    },  
+  { title: "Go Away",                 src: "music/Go Away.mp3"    },  
+  { title: "Just like Heaven",        src: "music/Just like Heaven.mp3"    },  
+  { title: "Love 2 Fast",             src: "music/Love 2 Fast.mp3"    },  
+  { title: "Restless",                src: "music/Restless.mp3"    },  
+  { title: "you're so perfect",       src: "music/you're so perfect.mp3"    },  
 ];
 
 // --- Config ----------------------------------------------------------
