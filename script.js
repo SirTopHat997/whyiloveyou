@@ -8,23 +8,24 @@
 // Add your MP3 files to the /music folder and list them here.
 const SONGS = [
   { title: "Acolyte",                 src: "music/acolyte.mp3"      },
-  { title: "As We Fight",             src: "music/As We Fight.mp3"   }, 
-  { title: "Ask - 2011 Remaster",     src: "music/Ask - 2011 Remaster.mp3"      },                                   
-  { title: "Baby, I Love You",        src: "music/Baby, I Love You.mp3"    },  
-  { title: "Cemetry Gates",           src: "music/Cemetry Gates.mp3"    },  
-  { title: "Cut Your Bangs",          src: "music/Cut Your Bangs.mp3"    },  
-  { title: "Go Away",                 src: "music/Go Away.mp3"    },  
-  { title: "Just like Heaven",        src: "music/Just like Heaven.mp3"    },  
-  { title: "Love 2 Fast",             src: "music/Love 2 Fast.mp3"    },  
-  { title: "Restless",                src: "music/Restless.mp3"    },  
-  { title: "you're so perfect",       src: "music/you're so perfect.mp3"    },  
+  { title: "As We Fight",             src: "music/As We Fight.mp3"   },
+  { title: "Ask - 2011 Remaster",     src: "music/Ask - 2011 Remaster.mp3"      },
+  { title: "Baby, I Love You",        src: "music/Baby, I Love You.mp3"    },
+  { title: "Cemetry Gates",           src: "music/Cemetry Gates.mp3"    },
+  { title: "Cut Your Bangs",          src: "music/Cut Your Bangs.mp3"    },
+  { title: "Go Away",                 src: "music/Go Away.mp3"    },
+  { title: "Just like Heaven",        src: "music/Just like Heaven.mp3"    },
+  { title: "Love 2 Fast",             src: "music/Love 2 Fast.mp3"    },
+  { title: "Restless",                src: "music/Restless.mp3"    },
+  { title: "you're so perfect",       src: "music/you're so perfect.mp3"    },
 ];
 
 // --- Config ----------------------------------------------------------
-const MUSIC_VOLUME    = 0.12;   // soft background level (0.0–1.0)
-const AVOID_LAST_N    = 8;      // avoid repeating the last N reasons
-const TYPING_DELAY_MS = 600;   // ms before typing indicator appears
-const REPLY_DELAY_MS  = 2000;   // ms typing indicator shows before reply
+const MUSIC_VOLUME      = 0.08;   // soft background level (0.0–1.0)
+const AVOID_LAST_N      = 8;      // avoid repeating the last N reasons
+const AVOID_LAST_SONGS  = 4;      // avoid repeating the last N songs
+const TYPING_DELAY_MS   = 200;    // ms before typing indicator appears
+const REPLY_DELAY_MS    = 2000;   // ms typing indicator shows before reply
 
 // --- Fallback reasons (used if reasons.json fails to load) -----------
 const FALLBACK_REASONS = [
@@ -40,22 +41,28 @@ const FALLBACK_REASONS = [
   { text: "You make ordinary days feel like something I'll remember forever.", category: "romantic" },
 ];
 
+// --- Session volume (resets on page load and when toggle is turned on) ---
+let sessionVolume = MUSIC_VOLUME;
+
 // --- State -----------------------------------------------------------
 const state = {
   reasons: [],
-  usedReasonIndices: [],  // circular buffer (keeps last AVOID_LAST_N)
+  usedReasonIndices: [],
   isTyping: false,
   music: {
-    isPlaying:    false,
+    isEnabled:    false,   // toggle switch on/off
+    isPlaying:    false,   // actual playback state
     currentIndex: -1,
-    lastIndex:    -1,   // track last played to avoid back-to-back repeats
+    playHistory:  [],      // newest-last; used to avoid recent songs
   },
 };
 
 // --- DOM refs (populated in init) ------------------------------------
 let messagesEl, sendBtn, inputEl, audioEl;
-let musicToggleBtn, musicDetails, nowPlayingEl, prevBtn, nextBtn;
-let iconMusicOn, iconMusicOff;
+let musicToggleEl, musicDetails, nowPlayingEl, prevBtn, nextBtn;
+let playPauseBtn, iconPlay, iconPause;
+let progressBar, albumArtEl, albumArtFallback;
+let volDownBtn, volUpBtn, volumeLevelEl;
 
 // --- Helpers ---------------------------------------------------------
 
@@ -64,7 +71,6 @@ function sleep(ms) {
 }
 
 function scrollBottom() {
-  // rAF ensures DOM has updated before scrolling
   requestAnimationFrame(() => {
     messagesEl.scrollTop = messagesEl.scrollHeight;
   });
@@ -78,16 +84,13 @@ async function handleSend() {
   state.isTyping = true;
   sendBtn.disabled = true;
 
-  // Outgoing bubble
   appendMessage("user", inputEl.value);
   scrollBottom();
 
-  // Pause — then show typing indicator
   await sleep(TYPING_DELAY_MS);
   showTyping();
   scrollBottom();
 
-  // Typing — then show Ben's reply
   await sleep(REPLY_DELAY_MS);
   hideTyping();
 
@@ -123,7 +126,6 @@ function hideTyping() {
 
 function pickReason() {
   const total = state.reasons.length;
-  // how many to avoid: min of AVOID_LAST_N and (total - 1) so we always have at least one option
   const avoidCount = Math.min(AVOID_LAST_N, total - 1);
   const recentlyUsed = state.usedReasonIndices.slice(-avoidCount);
 
@@ -135,7 +137,6 @@ function pickReason() {
   } while (recentlyUsed.includes(idx) && guard < 200);
 
   state.usedReasonIndices.push(idx);
-  // trim buffer to avoid unbounded growth
   if (state.usedReasonIndices.length > AVOID_LAST_N + 4) {
     state.usedReasonIndices.shift();
   }
@@ -145,100 +146,237 @@ function pickReason() {
 
 // --- Music player ----------------------------------------------------
 
-function toggleMusic() {
-  if (state.music.isPlaying) {
-    audioEl.pause();
-    state.music.isPlaying = false;
-  } else {
-    if (SONGS.length === 0) {
-      alert("No songs configured yet! Add MP3s to /music and update SONGS in script.js.");
-      return;
-    }
-    playRandomSong();
-  }
-  updateMusicUI();
-}
-
-function playRandomSong() {
-  if (SONGS.length === 0) return;
+function pickRandomSong() {
+  if (SONGS.length === 0) return 0;
+  const avoidCount = Math.min(AVOID_LAST_SONGS, SONGS.length - 1);
+  const recent = [...new Set(state.music.playHistory.slice(-avoidCount))];
 
   let idx;
   let guard = 0;
   do {
     idx = Math.floor(Math.random() * SONGS.length);
     guard++;
-  } while (idx === state.music.lastIndex && SONGS.length > 1 && guard < 50);
+  } while (recent.includes(idx) && guard < 200);
 
-  playSong(idx);
+  return idx;
 }
 
 function playSong(idx) {
-  if (idx < 0 || idx >= SONGS.length) return;
+  if (SONGS.length === 0 || idx < 0 || idx >= SONGS.length) return;
 
   state.music.currentIndex = idx;
-  state.music.lastIndex    = idx;
+  state.music.playHistory.push(idx);
+  if (state.music.playHistory.length > AVOID_LAST_SONGS + 4) {
+    state.music.playHistory.shift();
+  }
 
-  audioEl.src    = SONGS[idx].src;
-  audioEl.volume = MUSIC_VOLUME;
+  audioEl.src = encodeURI(SONGS[idx].src);
+  audioEl.volume = sessionVolume;
 
   audioEl.play()
     .then(() => {
       state.music.isPlaying = true;
-      updateMusicUI();
+      updatePlayPauseUI();
     })
     .catch(err => {
       console.warn("Audio playback blocked or file missing:", err);
       state.music.isPlaying = false;
-      updateMusicUI();
+      updatePlayPauseUI();
     });
+
+  nowPlayingEl.textContent = SONGS[idx].title;
+  resetProgressUI();
+  extractAlbumArt(encodeURI(SONGS[idx].src));
+}
+
+function handleToggleChange() {
+  state.music.isEnabled = musicToggleEl.checked;
+
+  if (state.music.isEnabled) {
+    sessionVolume = MUSIC_VOLUME;
+    audioEl.volume = sessionVolume;
+    updateVolumeUI();
+    musicDetails.classList.add("visible");
+    playSong(pickRandomSong());
+  } else {
+    musicDetails.classList.remove("visible");
+    audioEl.pause();
+    state.music.isPlaying = false;
+    updatePlayPauseUI();
+  }
+}
+
+function handlePlayPause() {
+  if (!state.music.isEnabled || state.music.currentIndex === -1) return;
+
+  if (state.music.isPlaying) {
+    audioEl.pause();
+    state.music.isPlaying = false;
+  } else {
+    audioEl.play()
+      .then(() => { state.music.isPlaying = true; updatePlayPauseUI(); })
+      .catch(() => {});
+  }
+  updatePlayPauseUI();
 }
 
 function nextSong() {
   if (SONGS.length === 0) return;
-  let next = (state.music.currentIndex + 1) % SONGS.length;
-  // if only one song, just restart it
-  playSong(next);
+  playSong(pickRandomSong());
 }
 
 function prevSong() {
   if (SONGS.length === 0) return;
-  let prev = (state.music.currentIndex - 1 + SONGS.length) % SONGS.length;
-  playSong(prev);
+  // Go back to second-to-last entry in history, or pick random if no history
+  const hist = state.music.playHistory;
+  if (hist.length >= 2) {
+    state.music.playHistory.pop(); // remove current
+    const prev = state.music.playHistory.pop(); // remove and play previous
+    playSong(prev);
+  } else {
+    playSong(pickRandomSong());
+  }
 }
 
-function updateMusicUI() {
-  const { isPlaying, currentIndex } = state.music;
-
-  if (isPlaying && currentIndex >= 0) {
-    musicToggleBtn.classList.add("playing");
-    iconMusicOn.style.display  = "none";
-    iconMusicOff.style.display = "block";
-    nowPlayingEl.textContent   = SONGS[currentIndex]?.title ?? "Unknown";
-    musicDetails.classList.add("visible");
+function updatePlayPauseUI() {
+  if (state.music.isPlaying) {
+    iconPlay.style.display  = "none";
+    iconPause.style.display = "block";
   } else {
-    musicToggleBtn.classList.remove("playing");
-    iconMusicOn.style.display  = "block";
-    iconMusicOff.style.display = "none";
-    nowPlayingEl.textContent   = "—";
-    musicDetails.classList.remove("visible");
+    iconPlay.style.display  = "block";
+    iconPause.style.display = "none";
   }
+}
+
+// --- Progress bar ----------------------------------------------------
+
+function resetProgressUI() {
+  progressBar.value = 0;
+  progressBar.style.background = `linear-gradient(to right, var(--blue) 0%, #d1d1d6 0%)`;
+}
+
+function updateProgressUI() {
+  if (!audioEl.duration) return;
+  const pct = (audioEl.currentTime / audioEl.duration) * 100;
+  progressBar.value = pct;
+  progressBar.style.background =
+    `linear-gradient(to right, var(--blue) ${pct}%, #d1d1d6 ${pct}%)`;
+}
+
+function handleScrub() {
+  if (!audioEl.duration) return;
+  audioEl.currentTime = (progressBar.value / 100) * audioEl.duration;
+}
+
+// --- Album art -------------------------------------------------------
+
+async function extractAlbumArt(src) {
+  albumArtEl.style.display = "none";
+  albumArtFallback.style.display = "flex";
+
+  try {
+    // Fetch the first 512 KB — enough for any embedded cover art
+    const res = await fetch(src, { headers: { Range: "bytes=0-524287" } });
+    if (!res.ok) return;
+
+    const buf = await res.arrayBuffer();
+    const b   = new Uint8Array(buf);
+    const dv  = new DataView(buf);
+
+    // ID3v2 magic: 'I','D','3'
+    if (b[0] !== 0x49 || b[1] !== 0x44 || b[2] !== 0x33) return;
+
+    // Tag size is a 4-byte syncsafe integer at bytes 6-9
+    const tagSize = ((b[6] & 0x7f) << 21) | ((b[7] & 0x7f) << 14) |
+                    ((b[8] & 0x7f) << 7)  |  (b[9] & 0x7f);
+
+    let pos = 10;
+    const limit = Math.min(10 + tagSize, b.length);
+
+    while (pos + 10 < limit) {
+      const frameId   = String.fromCharCode(b[pos], b[pos+1], b[pos+2], b[pos+3]);
+      const frameSize = dv.getUint32(pos + 4);   // big-endian, ID3v2.3 style
+      const dataStart = pos + 10;
+
+      if (frameId === "APIC" && frameSize > 0) {
+        let i = dataStart;
+        const enc = b[i++];                       // text encoding byte
+
+        // MIME type: null-terminated Latin-1 string
+        let mimeEnd = i;
+        while (mimeEnd < limit && b[mimeEnd] !== 0) mimeEnd++;
+        const mime = new TextDecoder().decode(b.slice(i, mimeEnd)) || "image/jpeg";
+        i = mimeEnd + 1;
+
+        i++;  // picture type byte
+
+        // Description: null-terminated; double-null for UTF-16 (enc 1 or 2)
+        if (enc === 1 || enc === 2) {
+          while (i + 1 < limit && !(b[i] === 0 && b[i + 1] === 0)) i += 2;
+          i += 2;
+        } else {
+          while (i < limit && b[i] !== 0) i++;
+          i++;
+        }
+
+        const imgData = b.slice(i, dataStart + frameSize);
+        const blob    = new Blob([imgData], { type: mime });
+        const url     = URL.createObjectURL(blob);
+        albumArtEl.onload = () => URL.revokeObjectURL(url);
+        albumArtEl.src = url;
+        albumArtEl.style.display = "block";
+        albumArtFallback.style.display = "none";
+        return;
+      }
+
+      // Guard against corrupt / zero-size frames to avoid infinite loop
+      if (frameSize <= 0 || dataStart + frameSize > limit) break;
+      pos = dataStart + frameSize;
+    }
+  } catch {
+    // silently fall through — fallback is already visible
+  }
+}
+
+// --- Volume controls -------------------------------------------------
+
+function volumeDown() {
+  sessionVolume = Math.max(0, sessionVolume - 0.05);
+  audioEl.volume = sessionVolume;
+  updateVolumeUI();
+}
+
+function volumeUp() {
+  sessionVolume = Math.min(1, sessionVolume + 0.05);
+  audioEl.volume = sessionVolume;
+  updateVolumeUI();
+}
+
+function updateVolumeUI() {
+  volumeLevelEl.textContent = Math.round(sessionVolume * 100) + "%";
 }
 
 // --- Initialization --------------------------------------------------
 
 async function init() {
-  // Cache DOM refs
   messagesEl      = document.getElementById("messages");
   sendBtn         = document.getElementById("sendButton");
   inputEl         = document.getElementById("messageInput");
   audioEl         = document.getElementById("audioPlayer");
-  musicToggleBtn  = document.getElementById("musicToggle");
+  musicToggleEl   = document.getElementById("musicToggle");
   musicDetails    = document.getElementById("musicDetails");
   nowPlayingEl    = document.getElementById("nowPlaying");
   prevBtn         = document.getElementById("prevSong");
   nextBtn         = document.getElementById("nextSong");
-  iconMusicOn     = document.getElementById("iconMusicOn");
-  iconMusicOff    = document.getElementById("iconMusicOff");
+  playPauseBtn    = document.getElementById("playPauseBtn");
+  iconPlay        = document.getElementById("iconPlay");
+  iconPause       = document.getElementById("iconPause");
+  progressBar     = document.getElementById("progressBar");
+  albumArtEl       = document.getElementById("albumArt");
+  albumArtFallback = document.getElementById("albumArtFallback");
+  volDownBtn       = document.getElementById("volDown");
+  volUpBtn         = document.getElementById("volUp");
+  volumeLevelEl    = document.getElementById("volumeLevel");
 
   // Load reasons
   try {
@@ -257,33 +395,33 @@ async function init() {
   sendBtn.addEventListener("click", handleSend);
   inputEl.addEventListener("keydown", e => {
     if (e.key === "Enter") { e.preventDefault(); handleSend(); }
-    else { e.preventDefault(); } // block all typing in the readonly field
+    else { e.preventDefault(); }
   });
-  // Extra safety: reset value if something changes it
   inputEl.addEventListener("input", () => {
     inputEl.value = "Why do you love me, Ben?";
   });
 
   // Music controls
   audioEl.volume = MUSIC_VOLUME;
-  audioEl.addEventListener("ended", () => {
-    // Auto-advance: pick next song (avoid same one if possible)
-    if (SONGS.length > 1) {
-      nextSong();
-    } else if (SONGS.length === 1) {
-      playSong(0); // loop the only song
-    } else {
-      state.music.isPlaying = false;
-      updateMusicUI();
-    }
-  });
 
-  musicToggleBtn.addEventListener("click", toggleMusic);
+  musicToggleEl.addEventListener("change", handleToggleChange);
+  playPauseBtn.addEventListener("click", handlePlayPause);
   prevBtn.addEventListener("click", prevSong);
   nextBtn.addEventListener("click", nextSong);
 
-  // Initial UI state
-  updateMusicUI();
+  audioEl.addEventListener("timeupdate", updateProgressUI);
+  progressBar.addEventListener("input", handleScrub);
+  volDownBtn.addEventListener("click", volumeDown);
+  volUpBtn.addEventListener("click", volumeUp);
+  updateVolumeUI();
+
+  audioEl.addEventListener("ended", () => {
+    state.music.isPlaying = false;
+    updatePlayPauseUI();
+    if (state.music.isEnabled) nextSong();
+  });
+
+  updatePlayPauseUI();
 }
 
 document.addEventListener("DOMContentLoaded", init);

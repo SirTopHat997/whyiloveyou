@@ -332,7 +332,6 @@ body {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   padding: 10px 12px;
   min-width: 44px;
-  transition: all 0.25s ease;
 }
 
 @media (min-width: 601px) {
@@ -342,75 +341,179 @@ body {
   }
 }
 
+/* Toggle row */
 .music-top-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.music-toggle-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--input-bg);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #555;
-  transition: background 0.15s, color 0.15s;
+.toggle-flanker {
+  color: #888;
   flex-shrink: 0;
 }
 
-.music-toggle-btn:hover {
-  background: #e0e0e8;
+/* iOS-style toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
 }
 
-.music-toggle-btn.playing {
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-track {
+  display: block;
+  width: 36px;
+  height: 20px;
+  background: #ccc;
+  border-radius: 10px;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.toggle-switch input:checked + .toggle-track {
   background: var(--blue);
-  color: white;
 }
 
-.music-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #555;
-  -webkit-user-select: none;
-  user-select: none;
-  white-space: nowrap;
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.2s;
 }
 
+.toggle-switch input:checked + .toggle-track .toggle-thumb {
+  transform: translateX(16px);
+}
+
+/* Expanding now-playing section */
 .music-details {
   margin-top: 8px;
   display: none;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .music-details.visible {
   display: flex;
 }
 
+/* Album art + title row */
+.np-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.album-art-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--input-bg);
+  position: relative;
+}
+
+.album-art {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  display: none;
+}
+
+.album-art-fallback {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  background: var(--input-bg);
+}
+
 .now-playing-text {
   font-size: 11px;
-  color: #555;
-  max-width: 140px;
+  color: #333;
+  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 500;
 }
 
-.music-ctrl-row {
+/* Progress / scrubber */
+.progress-bar {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(to right, var(--blue) 0%, #d1d1d6 0%);
+  accent-color: var(--blue);
+}
+
+.progress-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--blue);
+  cursor: pointer;
+}
+
+.progress-bar::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--blue);
+  border: none;
+  cursor: pointer;
+}
+
+/* Volume row */
+.music-vol-row {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
 }
 
+.vol-level-text {
+  font-size: 11px;
+  font-weight: 600;
+  color: #555;
+  min-width: 30px;
+  text-align: center;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Controls row */
+.music-ctrl-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .music-ctrl-btn {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 6px;
   background: var(--input-bg);
   border: none;
@@ -420,6 +523,7 @@ body {
   justify-content: center;
   color: #333;
   transition: background 0.12s;
+  flex-shrink: 0;
 }
 
 .music-ctrl-btn:hover {
@@ -428,6 +532,18 @@ body {
 
 .music-ctrl-btn:active {
   transform: scale(0.9);
+}
+
+.music-ctrl-play {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: white;
+}
+
+.music-ctrl-play:hover {
+  background: var(--blue-dark);
 }
 
 /* ===== Animations ===== */
