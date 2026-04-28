@@ -25,8 +25,8 @@ const MUSIC_VOLUME      = 0.1;   // soft background level (0.0–1.0)
 const AVOID_LAST_N      = 8;      // avoid repeating the last N reasons
 const AVOID_LAST_SONGS  = 4;      // avoid repeating the last N songs
 const TYPING_DELAY_MS   = 200;    // ms before typing indicator appears
-const REPLY_DELAY_MIN   = 1200;   // ms typing indicator shows before reply (min)
-const REPLY_DELAY_MAX   = 2000;   // ms typing indicator shows before reply (max)
+const REPLY_DELAY_MIN   = 1200;   // ms typing indicator shows before reply (shortest reason)
+const REPLY_DELAY_MAX   = 3200;   // ms typing indicator shows before reply (longest reason)
 
 // --- Fallback reasons (used if reasons.json fails to load) -----------
 const FALLBACK_REASONS = [
@@ -77,6 +77,15 @@ function scrollBottom() {
 
 // --- Message flow ----------------------------------------------------
 
+function calcReplyDelay(text) {
+  const lengths = state.reasons.map(r => r.text.length);
+  const minLen  = Math.min(...lengths);
+  const maxLen  = Math.max(...lengths);
+  if (maxLen === minLen) return REPLY_DELAY_MIN;
+  const t = (text.length - minLen) / (maxLen - minLen);  // 0..1
+  return Math.round(REPLY_DELAY_MIN + t * (REPLY_DELAY_MAX - REPLY_DELAY_MIN));
+}
+
 async function handleSend() {
   if (state.isTyping || state.reasons.length === 0) return;
 
@@ -87,13 +96,15 @@ async function handleSend() {
   scrollBottom();
 
   await sleep(TYPING_DELAY_MS);
+
+  const reason = pickReason();
+  const replyDelay = calcReplyDelay(reason.text);
   showTyping();
   scrollBottom();
 
-  await sleep(REPLY_DELAY_MIN + Math.random() * (REPLY_DELAY_MAX - REPLY_DELAY_MIN));
+  await sleep(replyDelay);
   hideTyping();
 
-  const reason = pickReason();
   appendMessage("ben", reason.text);
   scrollBottom();
 
@@ -274,8 +285,9 @@ async function extractAlbumArt(src) {
   albumArtFallback.style.display = "flex";
 
   try {
-    // Fetch the first 512 KB — enough for any embedded cover art
-    const res = await fetch(src, { headers: { Range: "bytes=0-524287" } });
+    // Fetch the file — try range request first, fall back to full fetch for mobile Safari
+    let res = await fetch(src, { headers: { Range: "bytes=0-524287" } });
+    if (!res.ok) res = await fetch(src);
     if (!res.ok) return;
 
     const buf = await res.arrayBuffer();
