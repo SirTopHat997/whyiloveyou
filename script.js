@@ -63,6 +63,7 @@ let musicToggleEl, musicDetails, nowPlayingEl, prevBtn, nextBtn;
 let playPauseBtn, iconPlay, iconPause;
 let progressBar, albumArtEl, albumArtFallback;
 let volDownBtn, volUpBtn, volumeLevelEl;
+let themeBtn, themeOptionsEl, themeSwatches;
 
 // --- Helpers ---------------------------------------------------------
 
@@ -252,7 +253,7 @@ function updatePlayPauseUI() {
 
 function resetProgressUI() {
   progressBar.value = 0;
-  progressBar.style.background = `linear-gradient(to right, var(--blue) 0%, #d1d1d6 0%)`;
+  progressBar.style.background = `linear-gradient(to right, var(--blue) 0%, var(--progress-track) 0%)`;
 }
 
 function updateProgressUI() {
@@ -260,7 +261,7 @@ function updateProgressUI() {
   const pct = (audioEl.currentTime / audioEl.duration) * 100;
   progressBar.value = pct;
   progressBar.style.background =
-    `linear-gradient(to right, var(--blue) ${pct}%, #d1d1d6 ${pct}%)`;
+    `linear-gradient(to right, var(--blue) ${pct}%, var(--progress-track) ${pct}%)`;
 }
 
 function handleScrub() {
@@ -338,6 +339,46 @@ async function extractAlbumArt(src) {
   }
 }
 
+// --- Theme picker ----------------------------------------------------
+
+function setTheme(theme) {
+  if (theme) {
+    document.documentElement.dataset.theme = theme;
+  } else {
+    delete document.documentElement.dataset.theme;
+  }
+  localStorage.setItem("theme", theme);
+  themeSwatches.forEach(btn =>
+    btn.classList.toggle("active", (btn.dataset.theme || "") === (theme || ""))
+  );
+  themeOptionsEl.classList.remove("open");
+}
+
+function initThemePicker() {
+  themeBtn        = document.getElementById("themeBtn");
+  themeOptionsEl  = document.getElementById("themeOptions");
+  themeSwatches   = [...document.querySelectorAll(".theme-swatch")];
+
+  themeBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    themeOptionsEl.classList.toggle("open");
+  });
+
+  themeSwatches.forEach(btn =>
+    btn.addEventListener("click", () => setTheme(btn.dataset.theme))
+  );
+
+  // Close when clicking anywhere else
+  document.addEventListener("click", () => themeOptionsEl.classList.remove("open"));
+  themeOptionsEl.addEventListener("click", e => e.stopPropagation());
+
+  // Mark whichever theme is already active (restored from localStorage)
+  const current = document.documentElement.dataset.theme || "";
+  themeSwatches.forEach(btn =>
+    btn.classList.toggle("active", (btn.dataset.theme || "") === current)
+  );
+}
+
 // --- Volume controls -------------------------------------------------
 
 function volumeDown() {
@@ -403,6 +444,8 @@ async function init() {
 
   // Music controls
   audioEl.volume = MUSIC_VOLUME;
+
+  initThemePicker();
 
   musicToggleEl.checked = false;  // browser persists checkbox state across reloads; force off
   musicToggleEl.addEventListener("change", handleToggleChange);
