@@ -1,62 +1,278 @@
 [
   {
-    "text": "Your laugh makes my heart melt every single time.",
+    "text": "I love how your whole face lights up when you smile.",
     "category": "romantic"
   },
   {
-    "text": "You make terrible puns and I love you for it anyway.",
+    "text": "I love how on our first hangout you gave me the most butterflies I’ve ever had.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you turn random, insignificant moments into ones that I cherish.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how the corners of your lips turn up sometimes when you look at me.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how I thought “wow, I’m really in this” the first time you said I love you.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how forgiving you are with me.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how safe I feel in your arms.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you let me kiss you goodbye on your forehead.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you bring out the best in me — I’ve become a better person since we started our relationship.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how when I’m with you, I don’t overthink.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how effortlessly our conversations flow.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you make sacrifices to see me and to make me feel good.",
+    "category": "romantic"
+  },
+  {
+    "text": "I (usually) love how cute it is that you’re obsessed with your lashes.",
     "category": "funny"
   },
   {
-    "text": "You're my favorite person to do absolutely nothing with.",
+    "text": "I love how you don’t mind when I respond instantly.",
     "category": "romantic"
   },
   {
-    "text": "You remember how I take my coffee and it makes me feel so seen.",
+    "text": "I love how you gave me a chance.",
     "category": "romantic"
   },
   {
-    "text": "The way you light up when you talk about things you love.",
+    "text": "I love how my heart flutters whenever I see a notification from you, and how I feel compelled to open it immediately.",
     "category": "romantic"
   },
   {
-    "text": "You somehow manage to be cute, funny, and wildly distracting all at once.",
+    "text": "I love how your little mannerisms, like saying “heh” and your minor fondness for DTI, have rubbed off on me.",
     "category": "funny"
   },
   {
-    "text": "You listen like nothing else in the world matters.",
+    "text": "I love that we call all the time.",
     "category": "romantic"
   },
   {
-    "text": "You sing in the shower and I pretend to hate it but I really, really love it.",
+    "text": "I love how your lash glue somehow ends up on everything you touch.",
     "category": "funny"
   },
   {
-    "text": "Because you're you — and that's more than enough for me.",
-    "category": "romantic"
-  },
-  {
-    "text": "You make ordinary days feel like something I'll remember forever.",
-    "category": "romantic"
-  },
-  {
-    "text": "You've seen me at my worst and somehow still think I'm worth it.",
-    "category": "romantic"
-  },
-  {
-    "text": "You have a genuinely unhinged amount of energy before 8am and somehow it's endearing.",
+    "text": "I love how you’re usually willing to bike to Lexington Center with me.",
     "category": "funny"
   },
   {
-    "text": "The small things you do, just to make me smile — you don't even realize you do them.",
+    "text": "I love how much you love garlic naan.",
+    "category": "funny"
+  },
+  {
+    "text": "I love how you express your love for me — especially via DoorDash.",
+    "category": "funny"
+  },
+  {
+    "text": "I love how comfortable I am with you — there isn’t anyone else in the world I act more like myself around.",
     "category": "romantic"
   },
   {
-    "text": "You take up exactly the right amount of space in my life.",
+    "text": "I love how your voice reflects your mood.",
     "category": "romantic"
   },
   {
-    "text": "Your hugs feel like home.",
+    "text": "I love the niche qualities you notice in me, like a lilt in my voice or my eyebrow cowlick.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you say my name.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love the slight smile you have when you get out of the car to come to my house.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you show me shows you love like Big Mouth and Stranger Things.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how much you trust me.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you say I made you more comfortable about your body image.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you sometimes walk like you’re in an audition for Queer Eye without even noticing.",
+    "category": "funny"
+  },
+  {
+    "text": "I love your style.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love the handmade cards and gifts you make me — please don’t stop, they’re my favorite gifts ever.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how tears welled in your eyes when I said “I love you” that one time in my basement.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how much you love the flowers I made for you.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how impressed you are by the things I build.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you thought I was a senior for the first two weeks we were talking on Snap.",
+    "category": "funny"
+  },
+  {
+    "text": "I love how far we’ve come in our relationship.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how normal things feel special to me because it’s you who does them.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how we pound it every time one of us burps.",
+    "category": "funny"
+  },
+  {
+    "text": "I love how you love having deep conversations.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how talking to you can reshape my view of the world in seconds.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love your family.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you sleep on my lap when we drive to the Berkshires.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how we have fun together, whether we have high energy or no energy at all.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how passionate you are about DTI.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how I could listen to your voice all day.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you always make my smile bigger.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how much passion you have for the things you love.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how I remember the layout of your room perfectly — I will be coming back, mark my words.",
+    "category": "funny"
+  },
+  {
+    "text": "I love how you act with me in public, like the world is our playground.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you listen to me.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how both of our moods lift when we see each other.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how communicative you are.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how your hugs warm my entire body.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how when we hug, it feels like two puzzle pieces fitting perfectly together.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you are a whole person (niche reference).",
+    "category": "funny"
+  },
+  {
+    "text": "I love how you lean your head on my shoulder on the couch or in the car.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how happy you are to be in a relationship with me.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how even in difficult moments, you still tell me “I love you” each night.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how when I’m with you, all I want is to be with you forever.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love thinking about our future together.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how we make each other better people.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you feel radically different from anyone else I know in the best, most unique way.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love the names you call me when you tell me goodnight.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love waking up next to you or on call with you.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how you're my favorite person to do absolutely nothing with.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love how distracting you are.",
+    "category": "romantic"
+  },
+  {
+    "text": "I love the names you call me when you tell me goodnight.",
     "category": "romantic"
   }
 ]

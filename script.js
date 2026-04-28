@@ -25,19 +25,17 @@ const MUSIC_VOLUME      = 0.1;   // soft background level (0.0–1.0)
 const AVOID_LAST_N      = 8;      // avoid repeating the last N reasons
 const AVOID_LAST_SONGS  = 4;      // avoid repeating the last N songs
 const TYPING_DELAY_MS   = 200;    // ms before typing indicator appears
-const REPLY_DELAY_MS    = 2000;   // ms typing indicator shows before reply
+const REPLY_DELAY_MIN   = 1200;   // ms typing indicator shows before reply (min)
+const REPLY_DELAY_MAX   = 2000;   // ms typing indicator shows before reply (max)
 
 // --- Fallback reasons (used if reasons.json fails to load) -----------
 const FALLBACK_REASONS = [
   { text: "Your laugh makes my heart melt every single time.", category: "romantic" },
   { text: "You make terrible puns and I love you for it anyway.", category: "funny" },
   { text: "You're my favorite person to do absolutely nothing with.", category: "romantic" },
-  { text: "You remember how I take my coffee and it makes me feel so seen.", category: "romantic" },
   { text: "The way you light up when you talk about things you love.", category: "romantic" },
   { text: "You somehow manage to be cute, funny, and wildly distracting all at once.", category: "funny" },
   { text: "You listen like nothing else in the world matters.", category: "romantic" },
-  { text: "You sing in the shower and I pretend to hate it but I really, really love it.", category: "funny" },
-  { text: "Because you're you — and that's more than enough for me.", category: "romantic" },
   { text: "You make ordinary days feel like something I'll remember forever.", category: "romantic" },
 ];
 
@@ -92,7 +90,7 @@ async function handleSend() {
   showTyping();
   scrollBottom();
 
-  await sleep(REPLY_DELAY_MS);
+  await sleep(REPLY_DELAY_MIN + Math.random() * (REPLY_DELAY_MAX - REPLY_DELAY_MIN));
   hideTyping();
 
   const reason = pickReason();
