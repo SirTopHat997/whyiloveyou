@@ -200,6 +200,7 @@ body {
   width: 57px;
   height: 57px;
   object-fit: contain;
+  border-radius: 50%;
   display: block;
 }
 
