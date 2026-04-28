@@ -23,7 +23,7 @@ const SONGS = [
 // --- Config ----------------------------------------------------------
 const MUSIC_VOLUME    = 0.12;   // soft background level (0.0–1.0)
 const AVOID_LAST_N    = 8;      // avoid repeating the last N reasons
-const TYPING_DELAY_MS = 2000;   // ms before typing indicator appears
+const TYPING_DELAY_MS = 600;   // ms before typing indicator appears
 const REPLY_DELAY_MS  = 2000;   // ms typing indicator shows before reply
 
 // --- Fallback reasons (used if reasons.json fails to load) -----------
