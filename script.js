@@ -42,6 +42,12 @@ const FALLBACK_REASONS = [
 // --- Session volume (resets on page load and when toggle is turned on) ---
 let sessionVolume = MUSIC_VOLUME;
 
+// --- Easter egg flags ------------------------------------------------
+let volumeWarningShown   = false;
+let motionPermissionDone = false;
+let lastShakeTime        = 0;
+let screenshotCooldown   = false;
+
 // --- State -----------------------------------------------------------
 const state = {
   reasons: [],
@@ -62,6 +68,7 @@ let playPauseBtn, iconPlay, iconPause;
 let progressBar, albumArtEl, albumArtFallback;
 let volDownBtn, volUpBtn, volumeLevelEl;
 let themeBtn, themeOptionsEl, themeSwatches;
+let contactNameEl;
 
 // --- Helpers ---------------------------------------------------------
 
@@ -87,6 +94,7 @@ function calcReplyDelay(text) {
 }
 
 async function handleSend() {
+  requestMotionPermission();
   if (state.isTyping || state.reasons.length === 0) return;
 
   state.isTyping = true;
@@ -130,6 +138,20 @@ function showTyping() {
 function hideTyping() {
   const el = document.getElementById("typingIndicator");
   if (el) el.remove();
+}
+
+async function sendEasterEggMessage(text) {
+  if (state.isTyping) return;
+  state.isTyping = true;
+  sendBtn.disabled = true;
+  showTyping();
+  scrollBottom();
+  await sleep(900);
+  hideTyping();
+  appendMessage("ben", text);
+  scrollBottom();
+  state.isTyping = false;
+  sendBtn.disabled = false;
 }
 
 // --- Reason picker ---------------------------------------------------
@@ -204,6 +226,7 @@ function handleToggleChange() {
 
   if (state.music.isEnabled) {
     sessionVolume = MUSIC_VOLUME;
+    volumeWarningShown = false;
     audioEl.volume = sessionVolume;
     updateVolumeUI();
     musicDetails.classList.add("visible");
@@ -389,18 +412,65 @@ function initThemePicker() {
   );
 }
 
+// --- Easter eggs -----------------------------------------------------
+
+function handleShake(e) {
+  const acc = e.accelerationIncludingGravity;
+  if (!acc) return;
+  const force = Math.abs(acc.x) + Math.abs(acc.y) + Math.abs(acc.z);
+  if (force > 30) {
+    const now = Date.now();
+    if (now - lastShakeTime > 4000) {
+      lastShakeTime = now;
+      sendEasterEggMessage("woah, I'm getting dizzy 😵‍💫");
+    }
+  }
+}
+
+function requestMotionPermission() {
+  if (motionPermissionDone) return;
+  motionPermissionDone = true;
+  if (typeof DeviceMotionEvent === "undefined") return;
+  if (typeof DeviceMotionEvent.requestPermission === "function") {
+    // iOS 13+ requires explicit permission from a user gesture
+    DeviceMotionEvent.requestPermission()
+      .then(result => { if (result === "granted") window.addEventListener("devicemotion", handleShake); })
+      .catch(() => {});
+  } else {
+    window.addEventListener("devicemotion", handleShake);
+  }
+}
+
+function initScreenshotDetection() {
+  let blurAt = 0;
+  window.addEventListener("blur", () => { blurAt = Date.now(); });
+  window.addEventListener("focus", () => {
+    if (blurAt && Date.now() - blurAt < 600 && !screenshotCooldown) {
+      screenshotCooldown = true;
+      setTimeout(() => { screenshotCooldown = false; }, 15000);
+      sendEasterEggMessage("caught you saving that 🥰");
+    }
+    blurAt = 0;
+  });
+}
+
 // --- Volume controls -------------------------------------------------
 
 function volumeDown() {
   sessionVolume = Math.max(0, sessionVolume - 0.05);
   audioEl.volume = sessionVolume;
   updateVolumeUI();
+  if (sessionVolume < 1) volumeWarningShown = false;
 }
 
 function volumeUp() {
   sessionVolume = Math.min(1, sessionVolume + 0.05);
   audioEl.volume = sessionVolume;
   updateVolumeUI();
+  if (sessionVolume >= 1 && !volumeWarningShown) {
+    volumeWarningShown = true;
+    sendEasterEggMessage("turn it down 😭");
+  }
 }
 
 function updateVolumeUI() {
@@ -428,6 +498,7 @@ async function init() {
   volDownBtn       = document.getElementById("volDown");
   volUpBtn         = document.getElementById("volUp");
   volumeLevelEl    = document.getElementById("volumeLevel");
+  contactNameEl    = document.getElementById("contactName");
 
   // Load reasons
   try {
@@ -476,6 +547,14 @@ async function init() {
   });
 
   updatePlayPauseUI();
+
+  // Easter egg: tap contact name to toggle nickname
+  contactNameEl.addEventListener("click", () => {
+    contactNameEl.textContent =
+      contactNameEl.textContent === "Ben Ansin" ? "Benito" : "Ben Ansin";
+  });
+
+  initScreenshotDetection();
 }
 
 document.addEventListener("DOMContentLoaded", init);
